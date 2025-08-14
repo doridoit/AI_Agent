@@ -4,6 +4,7 @@ load_dotenv()
 
 import streamlit as st
 import pandas as pd
+import chardet
 from modules import eda, anomaly_model
 from modules.llm_selector import LLMManager
 from modules.chatbot import ask_with_llm
@@ -18,28 +19,30 @@ st.title("🖥️ Data Analysis AI Agent")
 
 llm_manager = LLMManager()
 
+def read_file(file):
+    if file.name.endswith('.csv'):
+        rawdata = file.read()
+        result = chardet.detect(rawdata)
+        encoding = result['encoding']
+        file.seek(0)  # Move the file pointer back to the beginning
+        return pd.read_csv(file, encoding=encoding)
+    elif file.name.endswith('.xlsx'):
+        return pd.read_excel(file)
+
 # 1. 데이터 업로드
 uploaded_file = st.file_uploader("📁 데이터 파일을 업로드하세요 (CSV, Excel)", type=["csv", "xlsx"])
 
 if uploaded_file:
+    df = read_file(uploaded_file)
+
+    if df is None:
+        st.stop()
+
     file_ext = os.path.splitext(uploaded_file.name)[1].lower()
-    df = None
 
     if file_ext == ".csv":
-        try:
-            df = pd.read_csv(uploaded_file, encoding="utf-8")
-
-        except UnicodeDecodeError:
-            uploaded_file.seek(0)
-            df = pd.read_csv(uploaded_file, encoding="cp949")
-
-        except pd.errors.EmptyDataError:
-            st.error("⚠️ CSV 파일에 데이터가 없습니다.")
-            df = None
-
-        if df is not None:
-            st.write("📊 데이터 불러오기 완료")
-            st.dataframe(df)
+        st.write("📊 데이터 불러오기 완료")
+        st.dataframe(df)
 
     elif file_ext == ".xlsx":
         try:
@@ -172,8 +175,9 @@ if uploaded_file:
                 chain = create_memory_conversational_chain(llm, df_preview)
                 with ThreadPoolExecutor() as executor:
                     future = executor.submit(lambda: chain.invoke({
-                        "question": user_input,
-                        "df_head": df_preview
+                        "df_preview": df_preview,
+                        "history": "\n".join([]),
+                        "input": user_input
                     }, config={"configurable": {"session_id": "default"}}))
                     try:
                         answer = future.result(timeout=15)
