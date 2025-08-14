@@ -5,7 +5,7 @@ from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 import numpy as np
 
-def run_anomaly_detection(df, model_name="Logistic Regression"):
+def detect_anomalies(df, model_name="Logistic Regression"):
     if df is None or df.empty:
         return pd.DataFrame({"오류": ["데이터가 비어있어 이상탐지 불가"]})
 

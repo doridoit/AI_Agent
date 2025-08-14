@@ -3,19 +3,9 @@ from langchain.prompts import ChatPromptTemplate, FewShotPromptTemplate
 from langchain_core.runnables import RunnableSequence
 from langchain_core.output_parsers import StrOutputParser
 import pandas as pd
+from modules.chatbot.prompts import CHATBOT_PROMPT as prompt
 
 def ask_with_llm(llm: BaseChatModel, user_input: str, df: pd.DataFrame, chat_history: list[str] = []) -> str:
-    """
-    사용자의 질문과 데이터프레임을 기반으로 LLM에게 질문하고 응답을 반환하는 체이닝 기반 함수
-    """
-    # 프롬프트 템플릿 정의
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "너는 Python 기반 데이터 분석 AI야. 사용자의 질문에 정확하게 답변해야 해."),
-        ("human", "다음은 데이터의 일부 미리보기야:\n{df_preview}"),
-        ("human", "이전 대화 기록은 다음과 같아:\n{history}"),
-        ("human", "질문: {input}")
-    ])
-
     # 출력 파서 (텍스트만 출력)
     parser = StrOutputParser()
 

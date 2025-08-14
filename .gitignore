@@ -14,5 +14,7 @@
 
 logs/
 
-modules/__init__.py
 modules/__pycache__
+
+*.pyc
+
