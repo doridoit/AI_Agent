@@ -1,0 +1,16 @@
+# 가상환경
+.venv/
+
+# Python 캐시 파일
+__pycache__/
+*.pyc
+
+# 로그 파일
+logs/
+*.log
+
+# 환경변수 파일
+.env
+
+# VSCode 설정
+.vscode/
